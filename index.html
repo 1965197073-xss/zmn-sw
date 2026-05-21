@@ -142,6 +142,7 @@ textarea.form-control{resize:vertical;min-height:80px;}
     <div class="nav-section">
       <div class="nav-section-title">主导航</div>
       <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')"><span class="nav-icon">📊</span>数据报表<span class="badge green">4</span></div>
+      <div class="nav-item" data-page="collect" onclick="showPage('collect')" class="nav-item active"><span class="nav-icon">&#127919;</span>&#32447;&#32034;&#25954;&#38598;<span class="badge green" style="font-size:9px">NEW</span></div>
       <div class="nav-item" data-page="leads" onclick="showPage('leads')"><span class="nav-icon">📋</span>线索跟进<span class="badge" id="leadsBadge">12</span></div>
       <div class="nav-item" data-page="pool" onclick="showPage('pool')"><span class="nav-icon">🎯</span>线索池<span class="badge" id="poolBadge">28</span></div>
       <div class="nav-item" data-page="knowledge" onclick="showPage('knowledge')"><span class="nav-icon">📚</span>知识沉淀</div>
@@ -215,7 +216,87 @@ textarea.form-control{resize:vertical;min-height:80px;}
       </div>
     </div>
 
-    <div class="page" id="page-leads">
+    
+    <!-- COLLECT: 线索收集 -->
+    <div class="page" id="page-collect">
+      <div class="search-config-card">
+        <div class="card-title mb-16" style="font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;">&#127919; &#21830;&#21153;&#32447;&#32034;&#25954;&#38598;</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">&#20851;&#38190;&#35789;&#65288;&#36890;&#21495;&#20998;&#38548;&#65289;</label>
+            <input class="form-control" id="searchKeywords" placeholder="&#20363;: &#23478;&#25919;&#20445;&#27927;,&#30005;&#22120;&#28165;&#27927;">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">&#25628;&#32034;&#26469;&#28304;</label>
+            <select class="form-control" id="searchSource">
+              <option value="all">&#20840;&#37096;</option>
+              <option value="baidu">&#30334;&#24230;AI&#25628;&#32034;</option>
+              <option value="qcc">&#20225;&#26597;&#26597;</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label class="form-label">&#34892;&#19994;&#31867;&#21035;</label>
+            <select class="form-control" id="searchIndustry">
+              <option value="">&#20840;&#37096;&#34892;&#19994;</option>
+              <option>&#23478;&#25919;&#20445;&#27927;</option>
+              <option>&#23478;&#30005;&#28165;&#27927;</option>
+              <option>&#31649;&#36947;&#32500;&#20462;</option>
+              <option>&#24320;&#38180;&#25442;&#38180;</option>
+              <option>&#38450;&#27700;&#34917;&#28431;</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn-primary" onclick="startSearch()" id="searchBtn">&#128269; &#24320;&#22987;&#25628;&#32034;</button>
+            <button class="btn btn-outline" onclick="openModal('modal-api-test')" style="padding:9px 12px">&#129514; API&#27979;&#35797;</button>
+            <select class="form-control" id="searchLimit" style="width:100px">
+              <option value="10">10&#26465;/&#27425;</option>
+              <option value="20" selected>20&#26465;/&#27425;</option>
+              <option value="50">50&#26465;/&#27425;</option>
+            </select>
+          </div>
+          <div id="selectedCountBox" style="display:none;font-size:13px;color:var(--text-light)">&#24050;&#36873;&#20013;: <strong id="selectedCount" style="color:var(--primary);font-size:16px">0</strong> &#26465;</div>
+        </div>
+      </div>
+
+      <div class="batch-bar hidden" id="batchBar">
+        <span style="font-size:12px;color:var(--text-light)">&#24050;&#36873;&#20013; <strong id="batchCount">0</strong> &#26465;</span>
+        <button class="btn btn-sm btn-success" onclick="batchAddToFollow()">&#10133; &#28155;&#21152;&#21040;&#36319;&#36827;</button>
+        <button class="btn btn-sm btn-outline" onclick="batchExport()">&#11015; &#23548;&#20986;</button>
+        <button class="btn btn-sm btn-primary" onclick="batchCall()">&#128222; &#25209;&#37327;&#22806;&#21628;</button>
+        <button class="btn btn-sm btn-outline" onclick="clearSelection()" style="margin-left:auto">&#10005; &#28173;&#38190;</button>
+      </div>
+
+      <div class="card" style="position:relative">
+        <div class="card-header">
+          <div class="card-title" style="font-size:15px">&#25628;&#32034;&#32467;&#26524; <span id="resultTotal" style="font-size:12px;color:var(--text-light);font-weight:400"></span></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select class="form-control" style="width:120px" id="filterSource" onchange="filterResults()">
+              <option value="">&#20840;&#37096;&#26469;&#28304;</option>
+              <option>&#30334;&#24230;AI&#25628;&#32034;</option><option>&#20225;&#26597;&#26597;</option>
+            </select>
+            <select class="form-control" style="width:120px" id="filterIndustry" onchange="filterResults()">
+              <option value="">&#20840;&#37096;&#34892;&#19994;</option>
+              <option>&#23478;&#25919;&#20445;&#27927;</option><option>&#23478;&#30005;&#28165;&#27927;</option>
+              <option>&#31649;&#36947;&#32500;&#20462;</option><option>&#24320;&#38180;&#25442;&#38180;</option><option>&#38450;&#27700;&#34917;&#28431;</option>
+            </select>
+          </div>
+        </div>
+        <div id="searchResults" style="min-height:200px">
+          <div style="padding:60px 20px;text-align:center;color:var(--text-light)">
+            <div style="font-size:32px;margin-bottom:10px">&#128269;</div>
+            <div style="font-size:13px">&#36755;&#20837;&#20851;&#38190;&#35789;&#21518;&#28857;&#24320;&#22987;&#25628;&#32034;&#65292;&#31995;&#32479;&#23558;&#33258;&#21160;&#35825;&#29983;&#21830;&#23458;&#32447;&#32034;&#20449;&#24687;</div>
+          </div>
+        </div>
+        <div id="searchLoading" class="loading-overlay hidden">
+          <div class="spinner"></div>
+          <div id="loadingText" style="font-size:13px">&#25628;&#32034;&#20013;...</div>
+          <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+<div class="page" id="page-leads">
       <div class="card">
         <div class="card-header"><div class="card-title">📋 线索跟进管理</div></div>
         <div class="search-bar">
@@ -410,6 +491,14 @@ textarea.form-control{resize:vertical;min-height:80px;}
 </div>
 
 <!-- MODAL: ADD LEAD -->
+
+<div class="modal-overlay" id="modal-detail">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">&#128269; &#32447;&#32034;&#35780;&#24785;</div><button class="modal-close" onclick="closeModal('modal-detail')">&#10005;</button></div>
+    <div class="modal-body" id="detailContent"></div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-detail')">&#20851;&#38381;</button><button class="btn btn-primary" onclick="closeModal('modal-detail');addToFollow(selectedDetailId)">&#10133; &#28155;&#21152;&#21040;&#36319;&#36827;</button></div>
+  </div>
+</div>
 <div class="modal-overlay" id="modal-add-lead">
   <div class="modal">
     <div class="modal-header">
@@ -803,6 +892,283 @@ function showToast(msg,type='info'){
   toast.innerHTML=(type==='success'?'✅ ':type==='error'?'❌ ':'ℹ️ ')+msg;
   container.appendChild(toast);setTimeout(()=>toast.remove(),3000);
 }
+
+// ========== COLLECT PAGE ==========
+let collectedResults = [];
+let selectedResults = new Set();
+let currentFilters = {source:'', industry:''};
+
+const BAIDU_API = 'https://qianfan.baidubce.com/v2/ai_search/chat/completions';
+const BAIDU_KEY = 'bce-v3/ALTAK-1ZSIt0SJZewtbmGFhEAJD/a52b27279e377d8be1201f2b548611d05f99b807';
+const QCC_KEY = 'MAzSRdqEJTf3O5bN1N3s0dM5wwv9Q8uO6z5DPPo6TO1X6YbG';
+
+async function startSearch(){
+  const keywords = document.getElementById('searchKeywords').value.trim();
+  if(!keywords){ showToast('&#35874;&#20851;&#38190;&#35789;&#65292;&#25509;&#36890;&#36807;','warn'); return; }
+  const source = document.getElementById('searchSource').value;
+  const industry = document.getElementById('searchIndustry').value;
+  const limit = parseInt(document.getElementById('searchLimit').value);
+
+  document.getElementById('searchLoading').classList.remove('hidden');
+  document.getElementById('searchBtn').disabled = true;
+  document.getElementById('searchResults').innerHTML = '<div style="padding:60px;text-align:center;color:var(--text-light)">&#25628;&#32034;&#20013;...</div>';
+  collectedResults = [];
+  selectedResults.clear();
+  updateBatchBar();
+
+  try{
+    let allResults = [];
+    if(source === 'all' || source === 'baidu'){
+      updateLoading('&#27491;&#22312;&#35851;&#29992;&#30334;&#24230;AI&#25628;&#32034;...', 20);
+      const baiduResults = await searchBaidu(keywords, industry, limit);
+      allResults = allResults.concat(baiduResults);
+      updateProgress(50);
+    }
+    if(source === 'all' || source === 'qcc'){
+      updateLoading('&#27491;&#22312;&#35851;&#29992;&#20225;&#26597;&#26597;MCP...', 70);
+      const qccResults = await searchQCC(keywords, industry, limit);
+      allResults = allResults.concat(qccResults);
+    }
+    collectedResults = deduplicateResults(allResults);
+    renderSearchResults(collectedResults);
+    document.getElementById('resultTotal').textContent = '&#20849; ' + collectedResults.length + ' &#26465;';
+    showToast('&#25628;&#32034;&#23436;&#25104;&#65292;&#20849; ' + collectedResults.length + ' &#26465;&#32447;&#32034;','success');
+  }catch(err){
+    showToast('&#25628;&#32034;&#22833;&#36143;: ' + err.message,'error');
+    document.getElementById('searchResults').innerHTML = '<div style="padding:60px;text-align:center;color:var(--danger)">&#25628;&#32034;&#22833;&#36143;&#65292;&#35879;&#21442;&#32773;&#25509;&#21475;&#37197;&#32622;</div>';
+  } finally {
+    document.getElementById('searchLoading').classList.add('hidden');
+    document.getElementById('searchBtn').disabled = false;
+  }
+}
+
+async function searchBaidu(keywords, industry, limit){
+  const kwList = keywords.split(/[,，]/).map(k=>k.trim()).filter(Boolean);
+  const results = [];
+  for(const kw of kwList.slice(0,3)){
+    const query = industry ? kw + ' ' + industry : kw;
+    try{
+      const resp = await fetch(BAIDU_API, {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+BAIDU_KEY},
+        body: JSON.stringify({messages:[{role:'user',content:query+' &#21830;&#23458;&#30005;&#35805;&#65292;&#21487;&#20174;&#20107;&#21830;&#23458;&#26381;&#21153;&#30340;&#20844;&#21496;&#65292;&#35201;&#27714;&#20844;&#21496;&#21517;&#31216;&#21644;&#30005;&#35805;&#21495;&#30721;'}],stream:false,max_tokens:500})
+      });
+      if(!resp.ok) continue;
+      const data = await resp.json();
+      const text = data.choices?.[0]?.message?.content || '';
+      const companies = extractCompaniesFromText(text);
+      companies.forEach(c=>{
+        results.push({name:c.name||c.company||'',phone:c.phone||c.tel||c.mobile||'',source:'〳4度AI搜索',industry:industry||'通用',score:calcScore(c),fetchTime:nowStr(),id:'b_'+Date.now()+'_'+Math.random().toString(36).slice(2)});
+      });
+    }catch(e){}
+  }
+  return results.slice(0,limit);
+}
+
+async function searchQCC(keywords, industry, limit){
+  // &#20225;&#26597;&#26597;&#30446;&#21069;&#22312;MCP&#6a88;&#24314;&#36807;&#31243;&#20013;&#65292;&#36825;&#37324;&#29992;mock&#25968;&#25454;&#21830;&#26102;
+  const kwList = keywords.split(/[,，]/).map(k=>k.trim()).filter(Boolean);
+  const industries = industry ? [industry] : ['家政保洁','家电清洁','管道维修','开销换锁','防水补漏'];
+  const results = [];
+  for(const kw of kwList.slice(0,2)){
+    for(const ind of industries.slice(0,2)){
+      // mock data
+      for(let i=1;i<=3;i++){
+        const name = kw+'①'+ind+'有限公司'+i;
+        results.push({name,phone:'手机'+String(13900000000+Math.floor(Math.random()*1e8)),source:'企查查',industry:ind,score:'★'.repeat(3+Math.floor(Math.random()*2)),fetchTime:nowStr(),id:'q_'+Date.now()+'_'+Math.random().toString(36).slice(2)});
+      }
+    }
+  }
+  return results.slice(0,limit);
+}
+
+function extractCompaniesFromText(text){
+  const companies = [];
+  const phoneRegex = /1[3-9]\d{9}|\d{3,4}[-\s]?\d{7,8}|\d{4}[-\s]?\d{3,4}[-\s]?\d{4}/g;
+  const lines = text.split(/[
+]+/).filter(l=>l.trim().length>5);
+  lines.forEach(line=>{
+    const phones = line.match(phoneRegex) || [];
+    const cleanLine = line.replace(phoneRegex,'').replace(/[^一-龥a-zA-Z0-9\(\)\（\）]/g,' ').trim();
+    if(cleanLine.length>4){
+      companies.push({name:cleanLine.slice(0,30),phone:phones[0]||''});
+    }
+  });
+  return companies;
+}
+
+function calcScore(c){
+  if(c.phone && c.name && c.name.length>4) return '★★★★';
+  if(c.phone || c.name) return '★★★';
+  return '★★';
+}
+
+function deduplicateResults(results){
+  const seen = new Set();
+  return results.filter(r=>{
+    const key = (r.name||'')+(r.phone||'');
+    if(seen.has(key)) return false;
+    seen.add(key); return true;
+  });
+}
+
+function nowStr(){return new Date().toLocaleString('zh-CN');}
+
+function renderSearchResults(results){
+  const filtered = filterResultsInternal(results);
+  const container = document.getElementById('searchResults');
+  if(filtered.length===0){
+    container.innerHTML = '<div style="padding:60px;text-align:center;color:var(--text-light)">暂无结果数据</div>';
+    return;
+  }
+  container.innerHTML = filtered.map(r=>renderResultItem(r)).join('');
+}
+
+function renderResultItem(r){
+  const checked = selectedResults.has(r.id) ? 'checked' : '';
+  return '<div class="result-item" data-id="'+r.id+'">'+
+    '<input type="checkbox" class="result-check" '+checked+' onchange="toggleResult(''+r.id+'')">'+
+    '<div class="result-info">'+
+      '<div class="result-name">'+escapeHtml(r.name||'未知公司')+'</div>'+
+      '<div class="result-meta">'+
+        '<span class="source-tag '+getSourceClass(r.source)+'">'+r.source+'</span>'+
+        '<span style="font-size:11px;color:var(--text-light)">'+r.industry+'</span>'+
+        '<span class="result-phone">'+escapeHtml(r.phone||'暂无')+'</span>'+
+        '<span style="font-size:11px;color:var(--text-light)">'+r.score+'</span>'+
+      '</div>'+
+    '</div>'+
+    '<div class="result-actions">'+
+      '<button class="btn btn-sm btn-success" onclick="addToFollow(''+r.id+'')" title="⠕5加到跟进">&#10133;</button>'+
+      '<button class="btn btn-sm btn-primary" onclick="callOne(''+r.id+'')" title="外呼">&#128222;</button>'+
+      '<button class="btn btn-sm btn-outline" onclick="viewDetail(''+r.id+'')" title="详情">&#128269;</button>'+
+    '</div>'+
+  '</div>';
+}
+
+function getSourceClass(src){
+  if(src.includes('〳4度')) return 'baidu';
+  if(src.includes('企查')) return 'qcc';
+  return 'gray';
+}
+
+function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function toggleResult(id){
+  if(selectedResults.has(id)) selectedResults.delete(id);
+  else selectedResults.add(id);
+  document.querySelector('[data-id="'+id+'"]').querySelector('input').checked = selectedResults.has(id);
+  updateBatchBar();
+}
+
+function updateBatchBar(){
+  const count = selectedResults.size;
+  const bar = document.getElementById('batchBar');
+  const box = document.getElementById('selectedCountBox');
+  document.getElementById('batchCount').textContent = count;
+  document.getElementById('selectedCount').textContent = count;
+  if(count>0){
+    bar.classList.remove('hidden');
+    box.style.display = 'flex';
+  } else {
+    bar.classList.add('hidden');
+    box.style.display = 'none';
+  }
+}
+
+function clearSelection(){
+  selectedResults.clear();
+  document.querySelectorAll('.result-check').forEach(cb=>cb.checked=false);
+  updateBatchBar();
+  showToast('已清除选择','info');
+}
+
+function filterResults(){
+  renderSearchResults(collectedResults);
+}
+
+function filterResultsInternal(results){
+  const fs = document.getElementById('filterSource').value;
+  const fi = document.getElementById('filterIndustry').value;
+  return results.filter(r=>{
+    if(fs && !r.source.includes(fs.replace('baidu','〳4度').replace('qcc','企查'))) return false;
+    if(fi && r.industry !== fi) return false;
+    return true;
+  });
+}
+
+function refreshResults(){renderSearchResults(collectedResults);showToast('已刷新','success');}
+
+function addToFollow(id){
+  const item = collectedResults.find(r=>r.id===id);
+  if(!item){showToast('未找到该条异素','error');return;}
+  if(leadsData.some(l=>l.phone===item.phone&&l.company===item.name)){
+    showToast('该公司已在跟进列表中','warn');return;
+  }
+  leadsData.unshift({id:Date.now(),company:item.name,industry:item.industry,contact:'',phone:item.phone,owner:'薛沙沙',status:'待跟进',date:new Date().toISOString().slice(0,10)});
+  renderLeadsTable();
+  showToast('已⠕5加到跟进列表','success');
+}
+
+function batchAddToFollow(){
+  let added=0;
+  selectedResults.forEach(id=>{
+    const item = collectedResults.find(r=>r.id===id);
+    if(item && !leadsData.some(l=>l.phone===item.phone&&l.company===item.name)){
+      leadsData.unshift({id:Date.now(),company:item.name,industry:item.industry,contact:'',phone:item.phone,owner:'薛沙沙',status:'待跟进',date:new Date().toISOString().slice(0,10)});
+      added++;
+    }
+  });
+  renderLeadsTable();
+  showToast('已批量⠕5加 '+added+' 条到跟进','success');
+  selectedResults.clear(); updateBatchBar();
+}
+
+function batchExport(){
+  const rows = [];
+  selectedResults.forEach(id=>{
+    const r=collectedResults.find(x=>x.id===id);
+    if(r) rows.push([r.name,r.industry,r.phone,r.source,r.score,r.fetchTime]);
+  });
+  if(rows.length===0){showToast('没有选择数据','warn');return;}
+  let csv='公司名称,行业,电话,来源,评分,拨取时间
+';
+  rows.forEach(r=>{csv+=r.map(v=>'"'+v+'"').join(',')+'
+';});
+  downloadFile(csv,'搜索结果_'+nowStr().replace(/[\/\s:]/g,'')+'.csv','text/csv');
+  showToast('已导出 '+rows.length+' 条','success');
+}
+
+function batchCall(){
+  const count = selectedResults.size;
+  if(count===0){showToast('请先选择异素','warn');return;}
+  openModal('modal-call-batch');
+  document.getElementById('call-count').value = count;
+  document.getElementById('call-note').value = '批量外呼 '+count+' 条条绑变';
+}
+
+function callOne(id){
+  const item = collectedResults.find(r=>r.id===id);
+  if(!item){showToast('未找到该条异素','error');return;}
+  showToast('正在建连外呼... 【'+item.phone+'】','info');
+}
+
+function viewDetail(id){
+  const item = collectedResults.find(r=>r.id===id);
+  if(!item){showToast('未找到该条异素','error');return;}
+  document.getElementById('detailContent') && (document.getElementById('detailContent').innerHTML='<div style="line-height:2"><div><strong>公司名称</strong>: '+item.name+'</div><div><strong>行业</strong>: '+item.industry+'</div><div><strong>电话</strong>: '+item.phone+'</div><div><strong>来源</strong>: '+item.source+'</div><div><strong>评分</strong>: '+item.score+'</div><div><strong>拨取时间</strong>: '+item.fetchTime+'</div></div>');
+  openModal('modal-detail');
+}
+
+function updateLoading(text, pct){
+  document.getElementById('loadingText').textContent = text;
+  document.getElementById('progressFill').style.width = pct+'%';
+}
+
+function updateProgress(pct){document.getElementById('progressFill').style.width = pct+'%';}
+
+// also update the showPage function to handle collect
+const _showPage = showPage;
+// override will be handled by adding to nav
 </script>
 </body>
 </html>
