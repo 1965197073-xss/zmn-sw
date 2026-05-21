@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>啄木鸟商务管理平台</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{--primary:#1a73e8;--primary-dark:#1557b0;--sidebar-bg:#1e2a3a;--sidebar-hover:#2d3e52;--sidebar-active:#1a73e8;--bg:#f0f4f8;--card-bg:#fff;--text:#333;--text-light:#666;--border:#e0e6ed;--success:#34a853;--danger:#ea4335;--warning:#f57c00;--radius:12px;--shadow:0 2px 12px rgba(0,0,0,0.08);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'PingFang SC','Microsoft YaHei',Arial,sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden;}
+.sidebar{width:220px;background:var(--sidebar-bg);display:flex;flex-direction:column;flex-shrink:0;}
+.sidebar-logo{padding:20px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(255,255,255,0.08);}
+.logo-icon{width:36px;height:36px;background:var(--primary);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;}
+.logo-text{color:#fff;font-size:14px;font-weight:600;}
+.logo-sub{color:rgba(255,255,255,0.4);font-size:11px;}
+.sidebar-nav{flex:1;padding:12px 8px;overflow-y:auto;}
+.nav-section{margin-bottom:16px;}
+.nav-section-title{color:rgba(255,255,255,0.35);font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:4px 8px 8px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:rgba(255,255,255,0.7);cursor:pointer;transition:all 0.2s;font-size:13px;margin-bottom:2px;}
+.nav-item:hover{background:var(--sidebar-hover);color:#fff;}
+.nav-item.active{background:var(--sidebar-active);color:#fff;}
+.nav-icon{font-size:16px;width:20px;text-align:center;}
+.badge{margin-left:auto;background:var(--danger);color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;}
+.badge.green{background:var(--success);}
+.sidebar-footer{padding:12px 8px;border-top:1px solid rgba(255,255,255,0.08);}
+.user-info{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;}
+.user-avatar{width:32px;height:32px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;}
+.user-name{color:rgba(255,255,255,0.8);font-size:12px;}
+.user-role{color:rgba(255,255,255,0.4);font-size:10px;}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{background:var(--card-bg);padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-shrink:0;}
+.topbar-title{font-size:16px;font-weight:600;}
+.topbar-actions{display:flex;gap:8px;}
+.btn{padding:9px 18px;border-radius:8px;border:none;cursor:pointer;font-size:13px;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px;}
+.btn-sm{padding:6px 12px;font-size:12px;}
+.btn-primary{background:var(--primary);color:#fff;}
+.btn-primary:hover{background:var(--primary-dark);}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text);}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary);}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-success{background:var(--success);color:#fff;}
+.content{flex:1;overflow-y:auto;padding:24px;}
+.page{display:none;}
+.page.active{display:block;}
+.card{background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-bottom:20px;}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;}
+.card-title{font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:20px;}
+.stat-card{background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;display:flex;align-items:center;gap:16px;}
+.stat-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.stat-icon.blue{background:#e8f0fe;color:var(--primary);}
+.stat-icon.green{background:#e8f5e9;color:var(--success);}
+.stat-icon.orange{background:#fff3e0;color:var(--warning);}
+.stat-icon.red{background:#fce8e6;color:var(--danger);}
+.stat-info .stat-value{font-size:24px;font-weight:700;}
+.stat-info .stat-label{font-size:12px;color:var(--text-light);margin-top:2px;}
+.stat-change{font-size:11px;margin-top:4px;}
+.stat-change.up{color:var(--success);}
+.stat-change.down{color:var(--danger);}
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;padding:10px 12px;font-size:12px;color:var(--text-light);border-bottom:2px solid var(--border);font-weight:500;}
+td{padding:10px 12px;font-size:13px;border-bottom:1px solid var(--border);}
+tr:hover td{background:#f8fafc;}
+.status-tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;}
+.status-tag.blue{background:#e8f0fe;color:var(--primary);}
+.status-tag.yellow{background:#fff8e1;color:var(--warning);}
+.status-tag.green{background:#e8f5e9;color:var(--success);}
+.status-tag.red{background:#fce8e6;color:var(--danger);}
+.status-tag.gray{background:#f1f3f4;color:var(--text-light);}
+.form-group{margin-bottom:14px;}
+.form-label{font-size:12px;color:var(--text-light);margin-bottom:6px;display:block;font-weight:500;}
+.form-control{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none;transition:border 0.2s;}
+.form-control:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,115,232,0.1);}
+select.form-control{cursor:pointer;}
+textarea.form-control{resize:vertical;min-height:80px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.chart-container{width:100%;height:300px;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);display:none;align-items:center;justify-content:center;z-index:1000;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--card-bg);border-radius:var(--radius);width:90%;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.2);}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.modal-title{font-size:16px;font-weight:600;}
+.modal-close{width:32px;height:32px;border-radius:50%;border:none;background:#f1f3f4;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+.modal-close:hover{background:#e0e0e0;}
+.modal-body{padding:24px;}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;}
+.tabs{display:flex;gap:4px;border-bottom:2px solid var(--border);margin-bottom:20px;}
+.tab{padding:10px 20px;cursor:pointer;font-size:13px;color:var(--text-light);transition:all 0.2s;border-bottom:2px solid transparent;margin-bottom:-2px;}
+.tab:hover{color:var(--primary);}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600;}
+.config-section{background:#f8fafc;border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:16px;}
+.config-section-title{font-size:13px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.search-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.search-bar input{flex:1;min-width:180px;padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none;}
+.search-bar input:focus{border-color:var(--primary);}
+.knowledge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;}
+.knowledge-card{background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all 0.2s;}
+.knowledge-card:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:var(--shadow);}
+.knowledge-card .kc-icon{font-size:28px;margin-bottom:10px;}
+.knowledge-card .kc-title{font-size:13px;font-weight:600;margin-bottom:4px;}
+.knowledge-card .kc-desc{font-size:11px;color:var(--text-light);line-height:1.5;}
+.knowledge-card .kc-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px;}
+.knowledge-card .kc-tag{background:#e8f0fe;color:var(--primary);font-size:10px;padding:2px 8px;border-radius:4px;}
+.notif-banner{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:16px 24px;border-radius:var(--radius);margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;}
+.notif-banner .notif-close{background:rgba(255,255,255,0.2);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px;}
+.toast-container{position:fixed;top:20px;right:20px;z-index:2000;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--card-bg);border-radius:8px;padding:12px 16px;box-shadow:var(--shadow);font-size:13px;display:flex;align-items:center;gap:8px;min-width:240px;animation:slideIn 0.3s ease;}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+.toast.success{border-left:3px solid var(--success);}
+.toast.error{border-left:3px solid var(--danger);}
+.toast.info{border-left:3px solid var(--primary);}
+.upload-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:40px 20px;text-align:center;cursor:pointer;transition:all 0.2s;}
+.upload-zone:hover{border-color:var(--primary);background:#f8fbff;}
+.upload-zone .uz-icon{font-size:36px;margin-bottom:10px;}
+.upload-zone .uz-title{font-size:14px;font-weight:600;margin-bottom:4px;}
+.upload-zone .uz-desc{font-size:12px;color:var(--text-light);}
+.notif-item{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);}
+.notif-item:last-child{border-bottom:none;}
+.notif-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;}
+.notif-content{flex:1;}
+.notif-title{font-size:13px;font-weight:600;margin-bottom:2px;}
+.notif-desc{font-size:12px;color:var(--text-light);}
+.notif-time{font-size:11px;color:var(--text-light);margin-top:4px;}
+.notif-unread{width:8px;height:8px;border-radius:50%;background:var(--primary);flex-shrink:0;margin-top:6px;}
+.fw-600{font-weight:600;}
+.mb-4{margin-bottom:4px;}.mb-8{margin-bottom:8px;}.mb-16{margin-bottom:16px;}
+.flex{display:flex;}.flex-1{flex:1;}.items-center{align-items:center;}
+.gap-8{gap:8px;}.gap-12{gap:12px;}.justify-between{justify-content:space-between;}.flex-wrap{flex-wrap:wrap;}
+.hidden{display:none !important;}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🦉</div>
+    <div><div class="logo-text">啄木鸟商务</div><div class="logo-sub">管理平台 v1.0</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-section-title">主导航</div>
+      <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')"><span class="nav-icon">📊</span>数据报表<span class="badge green">4</span></div>
+      <div class="nav-item" data-page="leads" onclick="showPage('leads')"><span class="nav-icon">📋</span>线索跟进<span class="badge" id="leadsBadge">12</span></div>
+      <div class="nav-item" data-page="pool" onclick="showPage('pool')"><span class="nav-icon">🎯</span>线索池<span class="badge" id="poolBadge">28</span></div>
+      <div class="nav-item" data-page="knowledge" onclick="showPage('knowledge')"><span class="nav-icon">📚</span>知识沉淀</div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-section-title">系统</div>
+      <div class="nav-item" data-page="config" onclick="showPage('config')"><span class="nav-icon">⚙️</span>API配置</div>
+      <div class="nav-item" data-page="notifications" onclick="showPage('notifications')"><span class="nav-icon">🔔</span>通知中心<span class="badge">3</span></div>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar">沙</div>
+      <div><div class="user-name">薛沙沙</div><div class="user-role">商务负责人</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbarTitle">📊 数据报表中心</div>
+    <div class="topbar-actions">
+      <button class="btn btn-outline" onclick="syncAll()">🔄 同步数据</button>
+      <button class="btn btn-primary" onclick="openModal('modal-add-lead')">➕ 录入线索</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="page active" id="page-dashboard">
+      <div class="notif-banner">
+        <div class="notif-text">📈 本周新增线索 <strong>23条</strong>，外呼成功率 <strong>34%</strong>，环比上周提升 12%</div>
+        <button class="notif-close" onclick="this.parentElement.remove()">✕</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon blue">👥</div><div class="stat-info"><div class="stat-value">156</div><div class="stat-label">线索总数</div><div class="stat-change up">↑ 12% 较上周</div></div></div>
+        <div class="stat-card"><div class="stat-icon green">✅</div><div class="stat-info"><div class="stat-value">42</div><div class="stat-label">成功转化</div><div class="stat-change up">↑ 8% 较上周</div></div></div>
+        <div class="stat-card"><div class="stat-icon orange">📞</div><div class="stat-info"><div class="stat-value">89</div><div class="stat-label">已外呼</div><div class="stat-change down">↓ 3% 较上周</div></div></div>
+        <div class="stat-card"><div class="stat-icon red">🔥</div><div class="stat-info"><div class="stat-value">25</div><div class="stat-label">待跟进</div><div class="stat-change up">↑ 5条 今日新增</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📈 数据趋势</div>
+          <div class="flex gap-8">
+            <select class="form-control" style="width:120px" id="chartType" onchange="updateChart()">
+              <option value="line">折线图</option><option value="bar">柱状图</option><option value="pie">饼图</option>
+            </select>
+            <select class="form-control" style="width:120px" id="chartRange" onchange="updateChart()">
+              <option value="7">最近7天</option><option value="30">最近30天</option><option value="90">最近90天</option>
+            </select>
+          </div>
+        </div>
+        <div class="chart-container" id="mainChart"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">📋 最近线索动态</div>
+          <button class="btn btn-sm btn-outline" onclick="showPage('leads')">查看全部 →</button>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th>公司名称</th><th>行业</th><th>联系人</th><th>电话</th><th>状态</th><th>时间</th></tr></thead><tbody id="recentLeadsBody"></tbody></table>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">📁 Excel数据导入</div></div>
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+          <div class="uz-icon">📤</div>
+          <div class="uz-title">点击或拖拽上传 Excel 文件</div>
+          <div class="uz-desc">支持 .xlsx / .xls 格式，自动解析并展示数据</div>
+        </div>
+        <input type="file" id="fileInput" accept=".xlsx,.xls" style="display:none" onchange="handleExcelUpload(event)">
+        <div id="excelPreview" class="table-wrap hidden"></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-leads">
+      <div class="card">
+        <div class="card-header"><div class="card-title">📋 线索跟进管理</div></div>
+        <div class="search-bar">
+          <input type="text" placeholder="🔍 搜索公司名称、联系人或电话..." id="leadsSearch" oninput="filterLeads()">
+          <select class="form-control" style="width:130px" id="leadsStatusFilter" onchange="filterLeads()">
+            <option value="">全部状态</option>
+            <option value="待跟进">待跟进</option><option value="跟进中">跟进中</option><option value="已外呼">已外呼</option><option value="失败">失败</option><option value="成功">成功</option>
+          </select>
+          <select class="form-control" style="width:130px" id="leadsIndustryFilter" onchange="filterLeads()">
+            <option value="">全部行业</option>
+            <option>家政保洁</option><option>家电清洗</option><option>管道维修</option><option>开锁换锁</option><option>防水补漏</option>
+          </select>
+          <button class="btn btn-primary" onclick="openModal('modal-add-lead')">➕ 录入线索</button>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th><input type="checkbox"></th><th>公司名称</th><th>行业</th><th>联系人</th><th>电话</th><th>商务负责人</th><th>状态</th><th>录入时间</th><th>操作</th></tr></thead><tbody id="leadsTableBody"></tbody></table>
+        </div>
+        <div style="padding:12px 0;text-align:right;font-size:12px;color:var(--text-light)" id="leadsPagination"></div>
+      </div>
+    </div>
+
+    <div class="page" id="page-pool">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon blue">🎯</div><div class="stat-info"><div class="stat-value">28</div><div class="stat-label">线索池总数</div></div></div>
+        <div class="stat-card"><div class="stat-icon green">📞</div><div class="stat-info"><div class="stat-value">12</div><div class="stat-label">今日已外呼</div></div></div>
+        <div class="stat-card"><div class="stat-icon orange">⏳</div><div class="stat-info"><div class="stat-value">8</div><div class="stat-label">待外呼</div></div></div>
+        <div class="stat-card"><div class="stat-icon red">🔔</div><div class="stat-info"><div class="stat-value">3</div><div class="stat-label">钉钉通知</div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🎯 线索池</div>
+          <div class="flex gap-8">
+            <button class="btn btn-outline" onclick="syncPool()">🔄 同步线索</button>
+            <button class="btn btn-primary" onclick="openModal('modal-call-batch')">📞 批量外呼</button>
+          </div>
+        </div>
+        <div class="search-bar">
+          <input type="text" placeholder="🔍 搜索线索..." id="poolSearch" oninput="filterPool()">
+          <select class="form-control" style="width:130px" id="poolStatusFilter" onchange="filterPool()">
+            <option value="">全部</option><option>待外呼</option><option>已外呼</option><option>成功</option><option>失败</option>
+          </select>
+          <select class="form-control" style="width:130px"><option value="">全部来源</option><option>百度AI搜索</option><option>企查查</option><option>天眼查</option></select>
+        </div>
+        <div class="table-wrap">
+          <table><thead><tr><th><input type="checkbox"></th><th>来源</th><th>公司名称</th><th>行业</th><th>电话</th><th>评分</th><th>外呼状态</th><th>抓取时间</th><th>操作</th></tr></thead><tbody id="poolTableBody"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-knowledge">
+      <div class="tabs">
+        <div class="tab active" onclick="switchKTab(this,'kt-script')">💬 话术模板</div>
+        <div class="tab" onclick="switchKTab(this,'kt-ppt')">📽️ 培训资料</div>
+        <div class="tab" onclick="switchKTab(this,'kt-report')">📊 总结报表</div>
+      </div>
+      <div class="page active" id="kt-script">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">💬 话术模板库</div>
+            <button class="btn btn-primary" onclick="openModal('modal-add-script')">➕ 添加模板</button>
+          </div>
+          <div class="knowledge-grid" id="scriptGrid"></div>
+        </div>
+      </div>
+      <div class="page" id="kt-ppt">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📽️ 培训资料库</div>
+            <button class="btn btn-primary" onclick="document.getElementById('pptInput').click()">⬆️ 上传资料</button>
+            <input type="file" id="pptInput" accept=".ppt,.pptx,.pdf" style="display:none" onchange="handlePPTUpload(event)">
+          </div>
+          <div class="knowledge-grid" id="pptGrid"></div>
+        </div>
+      </div>
+      <div class="page" id="kt-report">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📊 数据总结报表</div>
+            <button class="btn btn-outline" onclick="exportReport()">⬇️ 导出报表</button>
+          </div>
+          <div class="chart-container" id="reportChart" style="height:250px"></div>
+          <div style="margin-top:20px">
+            <table><thead><tr><th>周期</th><th>新增线索</th><th>已外呼</th><th>成功</th><th>转化率</th><th>负责人</th></tr></thead><tbody id="reportTableBody"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-config">
+      <div class="card">
+        <div class="card-title mb-16">⚙️ API配置</div>
+        <div class="config-section">
+          <div class="config-section-title">📞 外呼API (Stepone AI)</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">API Key</label>
+              <input class="form-control" type="password" id="cfg-call-api" value="sk_GIIevTu3MtlLRW7xx9jFhg26hA3qnFIY">
+            </div>
+            <div class="form-group">
+              <label class="form-label">接口地址</label>
+              <input class="form-control" id="cfg-call-url" value="https://api.stepone.ai/call">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">外呼规则说明</label>
+            <textarea class="form-control" id="cfg-call-rule" rows="3">只对「待跟进」状态的线索进行外呼，外呼完成后状态统一改为「已外呼」</textarea>
+          </div>
+        </div>
+        <div class="config-section">
+          <div class="config-section-title">🔍 信息源 MCP 配置</div>
+          <div class="config-section mb-16" style="background:#fff">
+            <div class="flex items-center justify-between mb-8">
+              <div style="font-weight:600;font-size:13px">✅ 百度AI搜索</div>
+              <label style="display:flex;align-items:center;gap:6px;font-size:12px"><input type="checkbox" checked> 启用</label>
+            </div>
+            <div class="form-group mb-8">
+              <label class="form-label">API Endpoint</label>
+              <input class="form-control" value="https://qianfan.baidubce.com/v2/ai_search/chat/completions">
+            </div>
+            <div class="form-group mb-0">
+              <label class="form-label">API Key</label>
+              <input class="form-control" type="password" value="bce-v3/ALTAK-1ZSIt0SJZewtbmGFhEAJD/a52b27279e377d8be1201f2b548611d05f99b807">
+            </div>
+          </div>
+          <div class="config-section mb-16">
+            <div class="flex items-center justify-between mb-8">
+              <div style="font-weight:600;font-size:13px">✅ 企查查 MCP</div>
+              <label style="display:flex;align-items:center;gap:6px;font-size:12px"><input type="checkbox" checked> 启用</label>
+            </div>
+            <div class="form-group mb-8">
+              <label class="form-label">API Endpoint</label>
+              <input class="form-control" value="https://api.qcc.com">
+            </div>
+            <div class="form-group mb-0">
+              <label class="form-label">API Key</label>
+              <input class="form-control" type="password" value="MAzSRdqEJTf3O5bN1N3s0dM5wwv9Q8uO6z5DPPo6TO1X6YbG">
+            </div>
+          </div>
+          <div class="config-section">
+            <div class="flex items-center justify-between mb-8">
+              <div style="font-weight:600;font-size:13px">⬜ 天眼查 MCP</div>
+              <label style="display:flex;align-items:center;gap:6px;font-size:12px"><input type="checkbox"> 启用</label>
+            </div>
+            <div class="form-group mb-0">
+              <label class="form-label">API Key</label>
+              <input class="form-control" type="password" placeholder="输入天眼查API Key">
+            </div>
+          </div>
+        </div>
+        <div class="config-section">
+          <div class="config-section-title">💬 钉钉通知配置</div>
+          <div class="form-group">
+            <label class="form-label">钉钉 Webhook 地址</label>
+            <input class="form-control" id="cfg-dingtalk-url" placeholder="https://oapi.dingtalk.com/robot/send?access_token=...">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">通知时机</label>
+              <select class="form-control">
+                <option>外呼完成后通知</option>
+                <option>外呼成功后通知</option>
+                <option>外呼失败后通知</option>
+                <option>全部外呼结果都通知</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">推送人员</label>
+              <input class="form-control" placeholder="薛沙沙">
+            </div>
+          </div>
+          <div style="margin-top:12px">
+            <button class="btn btn-outline" onclick="testDingtalk()">🧪 发送测试通知</button>
+          </div>
+        </div>
+        <div class="flex gap-8" style="margin-top:8px">
+          <button class="btn btn-primary" onclick="saveConfig()">💾 保存配置</button>
+          <button class="btn btn-outline" onclick="showToast('配置已重置','info')">🔄 重置</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-notifications">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">🔔 通知中心</div>
+          <button class="btn btn-sm btn-outline" onclick="markAllRead()">✅ 全部已读</button>
+        </div>
+        <div id="notifList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ADD LEAD -->
+<div class="modal-overlay" id="modal-add-lead">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">➕ 录入线索</div>
+      <button class="modal-close" onclick="closeModal('modal-add-lead')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">公司名称 *</label>
+          <input class="form-control" id="lead-company" placeholder="请输入公司名称">
+        </div>
+        <div class="form-group">
+          <label class="form-label">所属行业 *</label>
+          <select class="form-control" id="lead-industry">
+            <option value="">请选择行业</option>
+            <option>家政保洁</option><option>家电清洗</option><option>管道维修</option><option>开锁换锁</option><option>防水补漏</option><option>其他</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">联系人</label>
+          <input class="form-control" id="lead-contact" placeholder="请输入联系人姓名">
+        </div>
+        <div class="form-group">
+          <label class="form-label">联系电话 *</label>
+          <input class="form-control" id="lead-phone" placeholder="请输入手机号">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">商务负责人</label>
+        <input class="form-control" id="lead-owner" value="薛沙沙">
+      </div>
+      <div class="form-group">
+        <label class="form-label">备注</label>
+        <textarea class="form-control" id="lead-note" rows="2" placeholder="其他备注信息..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-lead')">取消</button>
+      <button class="btn btn-primary" onclick="
+
+rows="2" placeholder="其他备注信息..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-lead')">取消</button>
+      <button class="btn btn-primary" onclick="addLead()">💾 保存线索</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ADD SCRIPT -->
+<div class="modal-overlay" id="modal-add-script">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">➕ 添加话术模板</div>
+      <button class="modal-close" onclick="closeModal('modal-add-script')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">模板名称 *</label>
+          <input class="form-control" id="script-name" placeholder="例如：家政保洁开场白">
+        </div>
+        <div class="form-group">
+          <label class="form-label">所属行业 *</label>
+          <select class="form-control" id="script-industry">
+            <option value="">请选择行业</option>
+            <option>家政保洁</option><option>家电清洗</option><option>管道维修</option><option>开锁换锁</option><option>防水补漏</option><option>通用</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">话术内容 *</label>
+        <textarea class="form-control" id="script-content" rows="5" placeholder="请输入完整话术内容..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">使用场景</label>
+        <select class="form-control" id="script-scene">
+          <option>开场白</option><option>需求挖掘</option><option>产品介绍</option><option>异议处理</option><option>促成签单</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-add-script')">取消</button>
+      <button class="btn btn-primary" onclick="addScript()">💾 保存模板</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: BATCH CALL -->
+<div class="modal-overlay" id="modal-call-batch">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📞 批量外呼</div>
+      <button class="modal-close" onclick="closeModal('modal-call-batch')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">选择外呼模式</label>
+        <select class="form-control" id="call-mode">
+          <option>从线索池选择</option>
+          <option>从线索跟进列表选择</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">外呼数量</label>
+        <input class="form-control" type="number" id="call-count" value="10" min="1" max="50">
+      </div>
+      <div class="form-group">
+        <label class="form-label">备注</label>
+        <textarea class="form-control" id="call-note" rows="2" placeholder="外呼备注..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-call-batch')">取消</button>
+      <button class="btn btn-primary" onclick="startBatchCall()">📞 开始外呼</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let leadsData = [
+  {id:1,company:"广州明洁家政服务",industry:"家政保洁",contact:"张先生",phone:"13800138001",owner:"薛沙沙",status:"待跟进",date:"2026-05-21"},
+  {id:2,company:"深圳清朗管道工程",industry:"管道维修",contact:"李女士",phone:"13800138002",owner:"薛沙沙",status:"跟进中",date:"2026-05-20"},
+  {id:3,company:"上海家轩家电清洗",industry:"家电清洗",contact:"王先生",phone:"13800138003",owner:"薛沙沙",status:"已外呼",date:"2026-05-19"},
+  {id:4,company:"北京开锁无忧服务",industry:"开锁换锁",contact:"赵女士",phone:"13800138004",owner:"薛沙沙",status:"成功",date:"2026-05-18"},
+  {id:5,company:"杭州防水修缮工程",industry:"防水补漏",contact:"刘先生",phone:"13800138005",owner:"薛沙沙",status:"失败",date:"2026-05-17"},
+  {id:6,company:"广州净居保洁服务",industry:"家政保洁",contact:"陈女士",phone:"13800138006",owner:"薛沙沙",status:"待跟进",date:"2026-05-21"},
+  {id:7,company:"深圳水暖维修中心",industry:"管道维修",contact:"周先生",phone:"13800138007",owner:"薛沙沙",status:"跟进中",date:"2026-05-20"},
+  {id:8,company:"上海洁家仕清洗",industry:"家电清洗",contact:"吴女士",phone:"13800138008",owner:"薛沙沙",status:"已外呼",date:"2026-05-19"},
+];
+let poolData = [
+  {id:1,source:"百度AI搜索",company:"广州美洁保洁",industry:"家政保洁",phone:"13900139001",score:"★★★★☆",callStatus:"待外呼",fetchDate:"2026-05-21"},
+  {id:2,source:"企查查",company:"深圳清水管道",industry:"管道维修",phone:"13900139002",score:"★★★☆☆",callStatus:"已外呼",fetchDate:"2026-05-21"},
+  {id:3,source:"百度AI搜索",company:"北京开锁宝服务",industry:"开锁换锁",phone:"13900139003",score:"★★★★★",callStatus:"成功",fetchDate:"2026-05-20"},
+  {id:4,source:"天眼查",company:"杭州防水大师",industry:"防水补漏",phone:"13900139004",score:"★★★☆☆",callStatus:"失败",fetchDate:"2026-05-20"},
+  {id:5,source:"企查查",company:"上海家电清洗王",industry:"家电清洗",phone:"13900139005",score:"★★★★☆",callStatus:"待外呼",fetchDate:"2026-05-21"},
+  {id:6,source:"百度AI搜索",company:"广州管道疏通专家",industry:"管道维修",phone:"13900139006",score:"★★★☆☆",callStatus:"已外呼",fetchDate:"2026-05-21"},
+  {id:7,source:"企查查",company:"深圳家政无忧",industry:"家政保洁",phone:"13900139007",score:"★★★★☆",callStatus:"待外呼",fetchDate:"2026-05-21"},
+  {id:8,source:"百度AI搜索",company:"北京防水修缮中心",industry:"防水补漏",phone:"13900139008",score:"★★★☆☆",callStatus:"待外呼",fetchDate:"2026-05-21"},
+];
+let scriptData = [
+  {id:1,name:"家政保洁开场白",industry:"家政保洁",scene:"开场白",content:"您好，我是啄木鸟家庭维修的商务顾问，看到您这边有家政保洁的需求..."},
+  {id:2,name:"管道维修需求挖掘",industry:"管道维修",scene:"需求挖掘",content:"请问您目前遇到的是什么类型的管道问题呢？厨房还是卫生间..."},
+  {id:3,name:"家电清洗产品介绍",industry:"家电清洗",scene:"产品介绍",content:"我们的家电清洗服务包含空调、洗衣机、抽油烟机等..."},
+  {id:4,name:"开锁换锁异议处理",industry:"开锁换锁",scene:"异议处理",content:"完全理解您的顾虑，我们使用的是C级锁芯，公安局备案的..."},
+  {id:5,name:"通用促成签单",industry:"通用",scene:"促成签单",content:"那我们就先帮您安排师傅上门看下情况，满意后再付款..."},
+];
+let pptData = [
+  {id:1,name:"家政保洁培训课件",desc:"新员工入职培训完整课件，包含服务流程和话术",tags:["培训","新员工"]},
+  {id:2,name:"家电清洗标准流程",desc:"家电清洗SOP标准操作流程视频教程",tags:["SOP","操作规范"]},
+  {id:3,name:"管道维修案例分享",desc:"管道维修经典案例分析与话术参考",tags:["案例分析","话术参考"]},
+  {id:4,name:"商务谈判技巧",desc:"商务谈判核心技巧培训PPT",tags:["谈判技巧","培训"]},
+];
+let notifData = [
+  {id:1,title:"外呼任务完成",desc:"已成功外呼 8 条线索，其中 3 条有效",time:"10分钟前",unread:true,icon:"📞"},
+  {id:2,title:"新线索入库",desc:"百度AI搜索抓取到 5 条新线索",time:"30分钟前",unread:true,icon:"🎯"},
+  {id:3,title:"转化提醒",desc:"广州明洁家政服务已标记为成功转化",time:"1小时前",unread:true,icon:"✅"},
+  {id:4,title:"系统同步完成",desc:"钉钉AI表格数据同步成功",time:"2小时前",unread:false,icon:"🔄"},
+];
+let reportData = [
+  {period:"2026-05-01~2026-05-07",newLeads:18,called:12,success:5,rate:"41.7%",owner:"薛沙沙"},
+  {period:"2026-05-08~2026-05-14",newLeads:22,called:18,success:7,rate:"38.9%",owner:"薛沙沙"},
+  {period:"2026-05-15~2026-05-21",newLeads:25,called:20,success:9,rate:"45.0%",owner:"薛沙沙"},
+];
+let mainChart=null,reportChart=null;
+
+window.addEventListener('DOMContentLoaded',()=>{
+  renderRecentLeads();renderLeadsTable();renderPoolTable();
+  renderScriptGrid();renderPPTGrid();renderReportTable();
+  renderNotifications();initChart();
+});
+
+function showPage(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelector('[data-page="'+page+'"]').classList.add('active');
+  const titles={dashboard:"📊 数据报表中心",leads:"📋 线索跟进管理",pool:"🎯 线索池",knowledge:"📚 知识沉淀",config:"⚙️ API配置",notifications:"🔔 通知中心"};
+  document.getElementById('topbarTitle').textContent=titles[page]||page;
+  if(page==='knowledge')switchKTab(document.querySelector('.tab'),'kt-script');
+}
+
+function switchKTab(el,tabId){
+  document.querySelectorAll('#page-knowledge .page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('#page-knowledge .tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  el.classList.add('active');
+  if(tabId==='kt-report'&&reportChart)setTimeout(()=>reportChart.resize(),100);
+}
+
+function initChart(){
+  mainChart=echarts.init(document.getElementById('mainChart'));
+  updateChart();
+}
+
+function updateChart(){
+  const type=document.getElementById('chartType').value;
+  const range=parseInt(document.getElementById('chartRange').value);
+  const days=[];
+  for(let i=0;i<range;i++){const d=new Date();d.setDate(d.getDate()-(range-1-i));days.push((d.getMonth()+1)+'/'+d.getDate());}
+  const gen=(min,max)=>days.map(()=>Math.floor(Math.random()*(max-min+1))+min);
+  const opts={tooltip:{trigger:'axis'},legend:{data:['新增线索','已外呼','成功']},xAxis:{type:'category',data:days},yAxis:{type:'value'},series:[
+    {name:'新增线索',type:type==='pie'?'pie':type,data:type==='pie'?[{value:35,name:'新增线索'},{value:28,name:'已外呼'},{value:12,name:'成功'}]:gen(2,8),smooth:true},
+    {name:'已外呼',type:type==='pie'?'pie':type,data:type==='pie'?[{value:35,name:'新增线索'},{value:28,name:'已外呼'},{value:12,name:'成功'}]:gen(1,6),smooth:true},
+    {name:'成功',type:type==='pie'?'pie':type,data:type==='pie'?[{value:35,name:'新增线索'},{value:28,name:'已外呼'},{value:12,name:'成功'}]:gen(0,3),smooth:true},
+  ]};
+  if(type==='pie'){delete opts.xAxis;delete opts.yAxis;opts.series[0].radius='60%';opts.series[0].label={show:true,formatter:'{b}: {c}'};}
+  mainChart.setOption(opts);
+}
+
+function getStatusClass(s){return{'待跟进':'blue','跟进中':'yellow','已外呼':'gray','失败':'red','成功':'green'}[s]||'gray';}
+
+function renderRecentLeads(){
+  document.getElementById('recentLeadsBody').innerHTML=leadsData.slice(0,5).map(l=>`<tr>
+    <td><a href="javascript:void(0)" onclick="showPage('leads')" style="color:var(--primary);text-decoration:none">${l.company}</a></td>
+    <td>${l.industry}</td><td>${l.contact}</td><td>${l.phone}</td>
+    <td><span class="status-tag ${getStatusClass(l.status)}">${l.status}</span></td><td>${l.date}</td>
+  </tr>`).join('');
+}
+
+function renderLeadsTable(){
+  document.getElementById('leadsTableBody').innerHTML=leadsData.map(l=>`<tr>
+    <td><input type="checkbox"></td>
+    <td>${l.company}</td><td>${l.industry}</td><td>${l.contact}</td><td>${l.phone}</td><td>${l.owner}</td>
+    <td><span class="status-tag ${getStatusClass(l.status)}">${l.status}</span></td><td>${l.date}</td>
+    <td><button class="btn btn-sm btn-outline" onclick="callLead(${l.id})">📞</button>
+    <button class="btn btn-sm btn-outline" onclick="editLead(${l.id})">✏️</button>
+    <button class="btn btn-sm btn-danger" onclick="deleteLead(${l.id})">🗑️</button></td>
+  </tr>`).join('');
+  document.getElementById('leadsBadge').textContent=leadsData.length;
+}
+
+function renderPoolTable(){
+  document.getElementById('poolTableBody').innerHTML=poolData.map(p=>`<tr>
+    <td><input type="checkbox"></td>
+    <td><span class="status-tag gray">${p.source}</span></td><td>${p.company}</td><td>${p.industry}</td><td>${p.phone}</td>
+    <td>${p.score}</td>
+    <td><span class="status-tag ${getPoolStatusClass(p.callStatus)}">${p.callStatus}</span></td><td>${p.fetchDate}</td>
+    <td><button class="btn btn-sm btn-primary" onclick="callOne(${p.id})">📞</button>
+    <button class="btn btn-sm btn-outline" onclick="viewDetail(${p.id})">👁️</button></td>
+  </tr>`).join('');
+  document.getElementById('poolBadge').textContent=poolData.length;
+}
+
+function getPoolStatusClass(s){return{'待外呼':'blue','已外呼':'gray','成功':'green','失败':'red'}[s]||'gray';}
+
+function filterLeads(){
+  const kw=document.getElementById('leadsSearch').value.toLowerCase();
+  const status=document.getElementById('leadsStatusFilter').value;
+  const industry=document.getElementById('leadsIndustryFilter').value;
+  const filtered=leadsData.filter(l=>(!kw||l.company.includes(kw)||l.contact.includes(kw)||l.phone.includes(kw))&&(!status||l.status===status)&&(!industry||l.industry===industry));
+  document.getElementById('leadsTableBody').innerHTML=filtered.map(l=>`<tr>
+    <td><input type="checkbox"></td><td>${l.company}</td><td>${l.industry}</td><td>${l.contact}</td><td>${l.phone}</td><td>${l.owner}</td>
+    <td><span class="status-tag ${getStatusClass(l.status)}">${l.status}</span></td><td>${l.date}</td>
+    <td><button class="btn btn-sm btn-outline" onclick="callLead(${l.id})">📞</button>
+    <button class="btn btn-sm btn-outline" onclick="editLead(${l.id})">✏️</button>
+    <button class="btn btn-sm btn-danger" onclick="deleteLead(${l.id})">🗑️</button></td>
+  </tr>`).join('');
+  document.getElementById('leadsPagination').textContent='共 '+filtered.length+' 条记录';
+}
+
+function filterPool(){
+  const kw=document.getElementById('poolSearch').value.toLowerCase();
+  const status=document.getElementById('poolStatusFilter').value;
+  const filtered=poolData.filter(p=>(!kw||p.company.includes(kw))&&(!status||p.callStatus===status));
+  document.getElementById('poolTableBody').innerHTML=filtered.map(p=>`<tr>
+    <td><input type="checkbox"></td><td><span class="status-tag gray">${p.source}</span></td><td>${p.company}</td><td>${p.industry}</td><td>${p.phone}</td>
+    <td>${p.score}</td><td><span class="status-tag ${getPoolStatusClass(p.callStatus)}">${p.callStatus}</span></td><td>${p.fetchDate}</td>
+    <td><button class="btn btn-sm btn-primary" onclick="callOne(${p.id})">📞</button>
+    <button class="btn btn-sm btn-outline" onclick="viewDetail(${p.id})">👁️</button></td>
+  </tr>`).join('');
+}
+
+function renderScriptGrid(){
+  document.getElementById('scriptGrid').innerHTML=scriptData.map(s=>`<div class="knowledge-card">
+    <div class="kc-icon">💬</div><div class="kc-title">${s.name}</div>
+    <div class="kc-desc">${s.content.slice(0,50)}...</div>
+    <div class="kc-tags"><span class="kc-tag">${s.industry}</span><span class="kc-tag">${s.scene}</span></div>
+  </div>`).join('');
+}
+
+function renderPPTGrid(){
+  document.getElementById('pptGrid').innerHTML=pptData.map(p=>`<div class="knowledge-card">
+    <div class="kc-icon">📽️</div><div class="kc-title">${p.name}</div>
+    <div class="kc-desc">${p.desc}</div>
+    <div class="kc-tags">${p.tags.map(t=>'<span class="kc-tag">'+t+'</span>').join('')}</div>
+  </div>`).join('');
+}
+
+function renderReportTable(){
+  document.getElementById('reportTableBody').innerHTML=reportData.map(r=>`<tr>
+    <td>${r.period}</td><td>${r.newLeads}</td><td>${r.called}</td><td>${r.success}</td>
+    <td><span class="status-tag ${parseFloat(r.rate)>40?'green':'yellow'}">${r.rate}</span></td><td>${r.owner}</td>
+  </tr>`).join('');
+  reportChart=echarts.init(document.getElementById('reportChart'));
+  reportChart.setOption({
+    tooltip:{trigger:'axis'},legend:{data:['新增线索','成功']},
+    xAxis:{type:'category',data:reportData.map(r=>r.period)},yAxis:{type:'value'},
+    series:[
+      {name:'新增线索',type:'bar',data:reportData.map(r=>r.newLeads),itemStyle:{color:'#1a73e8'}},
+      {name:'成功',type:'bar',data:reportData.map(r=>r.success),itemStyle:{color:'#34a853'}},
+    ]
+  });
+}
+
+function exportReport(){
+  let csv='信息报表导出
+周期,新增线索,已外呼,成功,转化率,负责人
+';
+  reportData.forEach(r=>{csv+=r.period+','+r.newLeads+','+r.called+','+r.success+','+r.rate+','+r.owner+'
+';});
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='report.csv';a.click();
+}
+
+function renderNotifications(){
+  document.getElementById('notifList').innerHTML=notifData.map(n=>`<div class="notif-item">
+    <div class="notif-icon" style="background:${n.unread?'#e8f0fe':'#f1f3f4'};color:${n.unread?'var(--primary)':'var(--text-light)'}">${n.icon}</div>
+    <div class="notif-content">
+      <div class="notif-title">${n.title}${n.unread?'<span class="notif-unread"></span>':''}</div>
+      <div class="notif-desc">${n.desc}</div><div class="notif-time">${n.time}</div>
+    </div>
+  </div>`).join('');
+}
+
+function markAllRead(){notifData.forEach(n=>n.unread=false);renderNotifications();showToast('已全部设为已读','success');}
+
+function openModal(id){document.getElementById(id).classList.add('show');}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+
+function addLead(){
+  const company=document.getElementById('lead-company').value.trim();
+  const industry=document.getElementById('lead-industry').value;
+  const phone=document.getElementById('lead-phone').value.trim();
+  if(!company||!industry||!phone){showToast('请填写必填项','error');return;}
+  leadsData.unshift({id:Date.now(),company,industry,contact:document.getElementById('lead-contact').value.trim(),phone,owner:document.getElementById('lead-owner').value.trim()||'薛沙沙',status:'待跟进',date:new Date().toISOString().slice(0,10)});
+  renderLeadsTable();renderRecentLeads();closeModal('modal-add-lead');showToast('线索添加成功','success');
+}
+
+function addScript(){
+  const name=document.getElementById('script-name').value.trim();
+  const content=document.getElementById('script-content').value.trim();
+  if(!name||!content){showToast('请填写必填项','error');return;}
+  scriptData.unshift({id:Date.now(),name,industry:document.getElementById('script-industry').value||'通用',scene:document.getElementById('script-scene').value,content});
+  renderScriptGrid();closeModal('modal-add-script');showToast('模板添加成功','success');
+}
+
+function deleteLead(id){if(!confirm('确定删除这条线索？'))return;leadsData=leadsData.filter(l=>l.id!==id);renderLeadsTable();showToast('线索已删除','info');}
+function callLead(id){showToast('正在发起外呼...','info');}
+function callOne(id){showToast('正在发起外呼...','info');}
+function editLead(id){showToast('编辑功能开发中','info');}
+function viewDetail(id){showToast('详情查看开发中','info');}
+function syncAll(){showToast('数据同步成功','success');}
+function syncPool(){showToast('线索池同步成功','success');}
+function startBatchCall(){closeModal('modal-call-batch');showToast('批量外呼任务已启动','success');}
+function testDingtalk(){showToast('测试通知发送成功！','success');}
+function saveConfig(){showToast('配置保存成功','success');}
+
+function handleExcelUpload(event){
+  const file=event.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'binary'});
+      const sheet=wb.Sheets[wb.SheetNames[0]];
+      const data=XLSX.utils.sheet_to_json(sheet);
+      const preview=document.getElementById('excelPreview');
+      let html='<table><thead><tr>';
+      if(data.length>0){Object.keys(data[0]).forEach(k=>html+=`<th>${k}</th>`);html+='</tr></thead><tbody>';
+        data.slice(0,10).forEach(row=>{html+='<tr>';Object.values(row).forEach(v=>html+=`<td>${v}</td>`);html+='</tr>';});
+        html+='</tbody></table>';preview.innerHTML=html;preview.classList.remove('hidden');
+        showToast('成功解析 '+data.length+' 条数据','success');}
+    }catch(err){showToast('文件解析失败','error');}
+  };
+  reader.readAsBinaryString(file);
+}
+
+function handlePPTUpload(event){
+  const file=event.target.files[0];if(!file)return;
+  pptData.unshift({id:Date.now(),name:file.name,desc:'上传文件：'+file.name,tags:['新上传']});
+  renderPPTGrid();showToast('文件上传成功','success');
+}
+
+function showToast(msg,type='info'){
+  const container=document.querySelector('.toast-container')||(()=>{const div=document.createElement('div');div.className='toast-container';document.body.appendChild(div);return div;})();
+  const toast=document.createElement('div');toast.className='toast '+type;
+  toast.innerHTML=(type==='success'?'✅ ':type==='error'?'❌ ':'ℹ️ ')+msg;
+  container.appendChild(toast);setTimeout(()=>toast.remove(),3000);
+}
+</script>
+</body>
+</html>
