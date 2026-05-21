@@ -141,10 +141,9 @@ textarea.form-control{resize:vertical;min-height:80px;}
   <nav class="sidebar-nav">
     <div class="nav-section">
       <div class="nav-section-title">主导航</div>
-      <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')"><span class="nav-icon">📊</span>数据报表<span class="badge green">4</span></div>
-      <div class="nav-item" data-page="collect" onclick="showPage('collect')" class="nav-item active"><span class="nav-icon">&#127919;</span>&#32447;&#32034;&#25954;&#38598;<span class="badge green" style="font-size:9px">NEW</span></div>
+      <div class="nav-item" data-page="dashboard" onclick="showPage('dashboard')"><span class="nav-icon">📊</span>数据报表<span class="badge green">4</span></div>
+      <div class="nav-item" data-page="collect" onclick="showPage('collect')"><span class="nav-icon">🎯</span>线索收集<span class="badge green" style="font-size:9px">NEW</span></div>
       <div class="nav-item" data-page="leads" onclick="showPage('leads')"><span class="nav-icon">📋</span>线索跟进<span class="badge" id="leadsBadge">12</span></div>
-      <div class="nav-item" data-page="pool" onclick="showPage('pool')"><span class="nav-icon">🎯</span>线索池<span class="badge" id="poolBadge">28</span></div>
       <div class="nav-item" data-page="knowledge" onclick="showPage('knowledge')"><span class="nav-icon">📚</span>知识沉淀</div>
     </div>
     <div class="nav-section">
@@ -680,7 +679,7 @@ function showPage(page){
   document.getElementById('page-'+page).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.querySelector('[data-page="'+page+'"]').classList.add('active');
-  const titles={dashboard:"📊 数据报表中心",leads:"📋 线索跟进管理",pool:"🎯 线索池",knowledge:"📚 知识沉淀",config:"⚙️ API配置",notifications:"🔔 通知中心"};
+  const titles={dashboard:"📊 数据报表中心",collect:"🎯 线索收集",leads:"📋 线索跟进管理",knowledge:"📚 知识沉淀",config:"⚙️ API配置",notifications:"🔔 通知中心"};
   document.getElementById('topbarTitle').textContent=titles[page]||page;
   if(page==='knowledge')switchKTab(document.querySelector('.tab'),'kt-script');
 }
@@ -986,7 +985,8 @@ function extractCompaniesFromText(text){
   const companies = [];
   const phoneRegex = /1[3-9]\d{9}|\d{3,4}[-\s]?\d{7,8}|\d{4}[-\s]?\d{3,4}[-\s]?\d{4}/g;
   const lines = text.split(/[
-]+/).filter(l=>l.trim().length>5);
+
+]+/).filter(l=>l.trim().length>5);
   lines.forEach(line=>{
     const phones = line.match(phoneRegex) || [];
     const cleanLine = line.replace(phoneRegex,'').replace(/[^一-龥a-zA-Z0-9\(\)\（\）]/g,' ').trim();
