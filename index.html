@@ -219,78 +219,78 @@ textarea.form-control{resize:vertical;min-height:80px;}
     <!-- COLLECT: 线索收集 -->
     <div class="page" id="page-collect">
       <div class="search-config-card">
-        <div class="card-title mb-16" style="font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;">&#127919; &#21830;&#21153;&#32447;&#32034;&#25954;&#38598;</div>
+        <div class="card-title mb-16" style="font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;">🎯 商务线索敢集</div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
           <div class="form-group" style="margin-bottom:0">
-            <label class="form-label">&#20851;&#38190;&#35789;&#65288;&#36890;&#21495;&#20998;&#38548;&#65289;</label>
-            <input class="form-control" id="searchKeywords" placeholder="&#20363;: &#23478;&#25919;&#20445;&#27927;,&#30005;&#22120;&#28165;&#27927;">
+            <label class="form-label">关键词（通号分隔）</label>
+            <input class="form-control" id="searchKeywords" placeholder="例: 家政保洗,电器清洗">
           </div>
           <div class="form-group" style="margin-bottom:0">
-            <label class="form-label">&#25628;&#32034;&#26469;&#28304;</label>
+            <label class="form-label">搜索来源</label>
             <select class="form-control" id="searchSource">
-              <option value="all">&#20840;&#37096;</option>
-              <option value="baidu">&#30334;&#24230;AI&#25628;&#32034;</option>
-              <option value="qcc">&#20225;&#26597;&#26597;</option>
+              <option value="all">全部</option>
+              <option value="baidu">百度AI搜索</option>
+              <option value="qcc">企查查</option>
             </select>
           </div>
           <div class="form-group" style="margin-bottom:0">
-            <label class="form-label">&#34892;&#19994;&#31867;&#21035;</label>
+            <label class="form-label">行业类别</label>
             <select class="form-control" id="searchIndustry">
-              <option value="">&#20840;&#37096;&#34892;&#19994;</option>
-              <option>&#23478;&#25919;&#20445;&#27927;</option>
-              <option>&#23478;&#30005;&#28165;&#27927;</option>
-              <option>&#31649;&#36947;&#32500;&#20462;</option>
-              <option>&#24320;&#38180;&#25442;&#38180;</option>
-              <option>&#38450;&#27700;&#34917;&#28431;</option>
+              <option value="">全部行业</option>
+              <option>家政保洗</option>
+              <option>家电清洗</option>
+              <option>管道维修</option>
+              <option>开锤换锤</option>
+              <option>防水补漏</option>
             </select>
           </div>
         </div>
         <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
           <div style="display:flex;gap:8px;align-items:center">
-            <button class="btn btn-primary" onclick="startSearch()" id="searchBtn">&#128269; &#24320;&#22987;&#25628;&#32034;</button>
-            <button class="btn btn-outline" onclick="openModal('modal-api-test')" style="padding:9px 12px">&#129514; API&#27979;&#35797;</button>
+            <button class="btn btn-primary" onclick="startSearch()" id="searchBtn">🔍 开始搜索</button>
+            <button class="btn btn-outline" onclick="openModal('modal-api-test')" style="padding:9px 12px">🧪 API测试</button>
             <select class="form-control" id="searchLimit" style="width:100px">
-              <option value="10">10&#26465;/&#27425;</option>
-              <option value="20" selected>20&#26465;/&#27425;</option>
-              <option value="50">50&#26465;/&#27425;</option>
+              <option value="10">10条/次</option>
+              <option value="20" selected>20条/次</option>
+              <option value="50">50条/次</option>
             </select>
           </div>
-          <div id="selectedCountBox" style="display:none;font-size:13px;color:var(--text-light)">&#24050;&#36873;&#20013;: <strong id="selectedCount" style="color:var(--primary);font-size:16px">0</strong> &#26465;</div>
+          <div id="selectedCountBox" style="display:none;font-size:13px;color:var(--text-light)">已选中: <strong id="selectedCount" style="color:var(--primary);font-size:16px">0</strong> 条</div>
         </div>
       </div>
 
       <div class="batch-bar hidden" id="batchBar">
-        <span style="font-size:12px;color:var(--text-light)">&#24050;&#36873;&#20013; <strong id="batchCount">0</strong> &#26465;</span>
-        <button class="btn btn-sm btn-success" onclick="batchAddToFollow()">&#10133; &#28155;&#21152;&#21040;&#36319;&#36827;</button>
-        <button class="btn btn-sm btn-outline" onclick="batchExport()">&#11015; &#23548;&#20986;</button>
-        <button class="btn btn-sm btn-primary" onclick="batchCall()">&#128222; &#25209;&#37327;&#22806;&#21628;</button>
-        <button class="btn btn-sm btn-outline" onclick="clearSelection()" style="margin-left:auto">&#10005; &#28173;&#38190;</button>
+        <span style="font-size:12px;color:var(--text-light)">已选中 <strong id="batchCount">0</strong> 条</span>
+        <button class="btn btn-sm btn-success" onclick="batchAddToFollow()">➕ 添加到跟进</button>
+        <button class="btn btn-sm btn-outline" onclick="batchExport()">⬇ 导出</button>
+        <button class="btn btn-sm btn-primary" onclick="batchCall()">📞 批量外呼</button>
+        <button class="btn btn-sm btn-outline" onclick="clearSelection()" style="margin-left:auto">✕ 渍键</button>
       </div>
 
       <div class="card" style="position:relative">
         <div class="card-header">
-          <div class="card-title" style="font-size:15px">&#25628;&#32034;&#32467;&#26524; <span id="resultTotal" style="font-size:12px;color:var(--text-light);font-weight:400"></span></div>
+          <div class="card-title" style="font-size:15px">搜索结果 <span id="resultTotal" style="font-size:12px;color:var(--text-light);font-weight:400"></span></div>
           <div style="display:flex;gap:8px;align-items:center">
             <select class="form-control" style="width:120px" id="filterSource" onchange="filterResults()">
-              <option value="">&#20840;&#37096;&#26469;&#28304;</option>
-              <option>&#30334;&#24230;AI&#25628;&#32034;</option><option>&#20225;&#26597;&#26597;</option>
+              <option value="">全部来源</option>
+              <option>百度AI搜索</option><option>企查查</option>
             </select>
             <select class="form-control" style="width:120px" id="filterIndustry" onchange="filterResults()">
-              <option value="">&#20840;&#37096;&#34892;&#19994;</option>
-              <option>&#23478;&#25919;&#20445;&#27927;</option><option>&#23478;&#30005;&#28165;&#27927;</option>
-              <option>&#31649;&#36947;&#32500;&#20462;</option><option>&#24320;&#38180;&#25442;&#38180;</option><option>&#38450;&#27700;&#34917;&#28431;</option>
+              <option value="">全部行业</option>
+              <option>家政保洗</option><option>家电清洗</option>
+              <option>管道维修</option><option>开锤换锤</option><option>防水补漏</option>
             </select>
           </div>
         </div>
         <div id="searchResults" style="min-height:200px">
           <div style="padding:60px 20px;text-align:center;color:var(--text-light)">
-            <div style="font-size:32px;margin-bottom:10px">&#128269;</div>
-            <div style="font-size:13px">&#36755;&#20837;&#20851;&#38190;&#35789;&#21518;&#28857;&#24320;&#22987;&#25628;&#32034;&#65292;&#31995;&#32479;&#23558;&#33258;&#21160;&#35825;&#29983;&#21830;&#23458;&#32447;&#32034;&#20449;&#24687;</div>
+            <div style="font-size:32px;margin-bottom:10px">🔍</div>
+            <div style="font-size:13px">输入关键词后点开始搜索，系统将自动诱生商客线索信息</div>
           </div>
         </div>
         <div id="searchLoading" class="loading-overlay hidden">
           <div class="spinner"></div>
-          <div id="loadingText" style="font-size:13px">&#25628;&#32034;&#20013;...</div>
+          <div id="loadingText" style="font-size:13px">搜索中...</div>
           <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
         </div>
       </div>
@@ -493,9 +493,9 @@ textarea.form-control{resize:vertical;min-height:80px;}
 
 <div class="modal-overlay" id="modal-detail">
   <div class="modal">
-    <div class="modal-header"><div class="modal-title">&#128269; &#32447;&#32034;&#35780;&#24785;</div><button class="modal-close" onclick="closeModal('modal-detail')">&#10005;</button></div>
+    <div class="modal-header"><div class="modal-title">🔍 线索评惑</div><button class="modal-close" onclick="closeModal('modal-detail')">✕</button></div>
     <div class="modal-body" id="detailContent"></div>
-    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-detail')">&#20851;&#38381;</button><button class="btn btn-primary" onclick="closeModal('modal-detail');addToFollow(selectedDetailId)">&#10133; &#28155;&#21152;&#21040;&#36319;&#36827;</button></div>
+    <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('modal-detail')">关闭</button><button class="btn btn-primary" onclick="closeModal('modal-detail');addToFollow(selectedDetailId)">➕ 添加到跟进</button></div>
   </div>
 </div>
 <div class="modal-overlay" id="modal-add-lead">
@@ -903,14 +903,14 @@ const QCC_KEY = 'MAzSRdqEJTf3O5bN1N3s0dM5wwv9Q8uO6z5DPPo6TO1X6YbG';
 
 async function startSearch(){
   const keywords = document.getElementById('searchKeywords').value.trim();
-  if(!keywords){ showToast('&#35874;&#20851;&#38190;&#35789;&#65292;&#25509;&#36890;&#36807;','warn'); return; }
+  if(!keywords){ showToast('谢关键词，接通过','warn'); return; }
   const source = document.getElementById('searchSource').value;
   const industry = document.getElementById('searchIndustry').value;
   const limit = parseInt(document.getElementById('searchLimit').value);
 
   document.getElementById('searchLoading').classList.remove('hidden');
   document.getElementById('searchBtn').disabled = true;
-  document.getElementById('searchResults').innerHTML = '<div style="padding:60px;text-align:center;color:var(--text-light)">&#25628;&#32034;&#20013;...</div>';
+  document.getElementById('searchResults').innerHTML = '<div style="padding:60px;text-align:center;color:var(--text-light)">搜索中...</div>';
   collectedResults = [];
   selectedResults.clear();
   updateBatchBar();
@@ -918,23 +918,23 @@ async function startSearch(){
   try{
     let allResults = [];
     if(source === 'all' || source === 'baidu'){
-      updateLoading('&#27491;&#22312;&#35851;&#29992;&#30334;&#24230;AI&#25628;&#32034;...', 20);
+      updateLoading('正在谋用百度AI搜索...', 20);
       const baiduResults = await searchBaidu(keywords, industry, limit);
       allResults = allResults.concat(baiduResults);
       updateProgress(50);
     }
     if(source === 'all' || source === 'qcc'){
-      updateLoading('&#27491;&#22312;&#35851;&#29992;&#20225;&#26597;&#26597;MCP...', 70);
+      updateLoading('正在谋用企查查MCP...', 70);
       const qccResults = await searchQCC(keywords, industry, limit);
       allResults = allResults.concat(qccResults);
     }
     collectedResults = deduplicateResults(allResults);
     renderSearchResults(collectedResults);
-    document.getElementById('resultTotal').textContent = '&#20849; ' + collectedResults.length + ' &#26465;';
-    showToast('&#25628;&#32034;&#23436;&#25104;&#65292;&#20849; ' + collectedResults.length + ' &#26465;&#32447;&#32034;','success');
+    document.getElementById('resultTotal').textContent = '共 ' + collectedResults.length + ' 条';
+    showToast('搜索完成，共 ' + collectedResults.length + ' 条线索','success');
   }catch(err){
-    showToast('&#25628;&#32034;&#22833;&#36143;: ' + err.message,'error');
-    document.getElementById('searchResults').innerHTML = '<div style="padding:60px;text-align:center;color:var(--danger)">&#25628;&#32034;&#22833;&#36143;&#65292;&#35879;&#21442;&#32773;&#25509;&#21475;&#37197;&#32622;</div>';
+    showToast('搜索失贯: ' + err.message,'error');
+    document.getElementById('searchResults').innerHTML = '<div style="padding:60px;text-align:center;color:var(--danger)">搜索失贯，谧参者接口配置</div>';
   } finally {
     document.getElementById('searchLoading').classList.add('hidden');
     document.getElementById('searchBtn').disabled = false;
@@ -950,7 +950,7 @@ async function searchBaidu(keywords, industry, limit){
       const resp = await fetch(BAIDU_API, {
         method:'POST',
         headers:{'Content-Type':'application/json','Authorization':'Bearer '+BAIDU_KEY},
-        body: JSON.stringify({messages:[{role:'user',content:query+' &#21830;&#23458;&#30005;&#35805;&#65292;&#21487;&#20174;&#20107;&#21830;&#23458;&#26381;&#21153;&#30340;&#20844;&#21496;&#65292;&#35201;&#27714;&#20844;&#21496;&#21517;&#31216;&#21644;&#30005;&#35805;&#21495;&#30721;'}],stream:false,max_tokens:500})
+        body: JSON.stringify({messages:[{role:'user',content:query+' 商客电话，可从事商客服务的公司，要求公司名称和电话号码'}],stream:false,max_tokens:500})
       });
       if(!resp.ok) continue;
       const data = await resp.json();
@@ -965,7 +965,7 @@ async function searchBaidu(keywords, industry, limit){
 }
 
 async function searchQCC(keywords, industry, limit){
-  // &#20225;&#26597;&#26597;&#30446;&#21069;&#22312;MCP&#6a88;&#24314;&#36807;&#31243;&#20013;&#65292;&#36825;&#37324;&#29992;mock&#25968;&#25454;&#21830;&#26102;
+  // 企查查目前在MCPa88;建过程中，这里用mock数据商时
   const kwList = keywords.split(/[,，]/).map(k=>k.trim()).filter(Boolean);
   const industries = industry ? [industry] : ['家政保洁','家电清洁','管道维修','开销换锁','防水补漏'];
   const results = [];
@@ -1038,9 +1038,9 @@ function renderResultItem(r){
       '</div>'+
     '</div>'+
     '<div class="result-actions">'+
-      '<button class="btn btn-sm btn-success" onclick="addToFollow(''+r.id+'')" title="⠕5加到跟进">&#10133;</button>'+
-      '<button class="btn btn-sm btn-primary" onclick="callOne(''+r.id+'')" title="外呼">&#128222;</button>'+
-      '<button class="btn btn-sm btn-outline" onclick="viewDetail(''+r.id+'')" title="详情">&#128269;</button>'+
+      '<button class="btn btn-sm btn-success" onclick="addToFollow(''+r.id+'')" title="⠕5加到跟进">➕</button>'+
+      '<button class="btn btn-sm btn-primary" onclick="callOne(''+r.id+'')" title="外呼">📞</button>'+
+      '<button class="btn btn-sm btn-outline" onclick="viewDetail(''+r.id+'')" title="详情">🔍</button>'+
     '</div>'+
   '</div>';
 }
@@ -1051,7 +1051,7 @@ function getSourceClass(src){
   return 'gray';
 }
 
-function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function escapeHtml(s){return String(s).replace(/&/g,'&').replace(/</g,'<').replace(/>/g,'>');}
 
 function toggleResult(id){
   if(selectedResults.has(id)) selectedResults.delete(id);
